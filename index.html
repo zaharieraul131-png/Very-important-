@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Dish·Craft</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue: #3a82cc;
+    --blue-light: #6ab5f4;
+    --blue-dim: rgba(58,130,204,.18);
+    --text: #1a2a3a;
+    --muted: #5a7a9a;
+    --hint: #7a9ab0;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #cde3f5 0%, #e2f0fb 45%, #f0f7ff 100%);
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(90px);
+    pointer-events: none;
+    z-index: 0;
+    animation: bd 20s ease-in-out infinite alternate;
+  }
+  .b1 { width: 500px; height: 500px; background: #9ec9ee; opacity: .5; top: -130px; left: -130px; }
+  .b2 { width: 380px; height: 380px; background: #bcdff8; opacity: .4; top: 38%; right: -90px; animation-delay: -8s; }
+  .b3 { width: 280px; height: 280px; background: #d5eeff; opacity: .35; bottom: 8%; left: 28%; animation-delay: -15s; }
+  @keyframes bd { from { transform: translate(0,0) scale(1); } to { transform: translate(26px,36px) scale(1.07); } }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 16px 80px;
+  }
+
+  .hdr { text-align: center; padding: 40px 0 24px; }
+  .logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 8vw, 3.2rem);
+    font-weight: 300;
+    letter-spacing: .03em;
+  }
+  .logo em { color: var(--blue); font-style: italic; }
+  .tag {
+    margin-top: 8px;
+    font-size: .72rem;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .glass {
+    background: rgba(255,255,255,.36);
+    backdrop-filter: blur(30px) saturate(1.6);
+    -webkit-backdrop-filter: blur(30px) saturate(1.6);
+    border: 1px solid rgba(255,255,255,.65);
+    box-shadow: 0 8px 40px rgba(100,150,210,.14), inset 0 1px 0 rgba(255,255,255,.75);
+  }
+
+  .card { border-radius: 22px; padding: 24px 20px 20px; margin-bottom: 18px; }
+
+  .lbl {
+    font-size: .68rem;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+
+  .key-row { display: flex; gap: 8px; align-items: center; }
+
+  .key-input {
+    flex: 1;
+    border: 1px solid rgba(255,255,255,.8);
+    border-radius: 100px;
+    background: rgba(255,255,255,.55);
+    padding: 10px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .84rem;
+    color: var(--text);
+    outline: none;
+    transition: box-shadow .2s;
+  }
+  .key-input:focus { box-shadow: 0 0 0 2.5px rgba(58,130,204,.25); }
+  .key-input::placeholder { color: #99b5cc; }
+
+  .key-badge {
+    font-size: .68rem;
+    background: rgba(58,130,204,.1);
+    border: 1px solid rgba(58,130,204,.25);
+    color: var(--blue);
+    border-radius: 100px;
+    padding: 4px 10px;
+    white-space: nowrap;
+  }
+  .key-badge.set { background: rgba(40,160,80,.1); border-color: rgba(40,160,80,.3); color: #1a7a40; }
+
+  .key-hint { font-size: .69rem; color: var(--hint); margin-top: 8px; }
+  .key-hint a { color: var(--blue); text-decoration: none; }
+
+  .ca {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    align-items: center;
+    min-height: 50px;
+    padding: 9px 12px;
+    border-radius: 13px;
+    background: rgba(255,255,255,.55);
+    border: 1px solid rgba(255,255,255,.8);
+    box-shadow: inset 0 2px 8px rgba(80,130,200,.06);
+    cursor: text;
+    transition: box-shadow .2s;
+  }
+  .ca:focus-within { box-shadow: inset 0 2px 8px rgba(58,130,204,.1), 0 0 0 2.5px rgba(58,130,204,.2); }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(58,130,204,.11);
+    border: 1px solid rgba(58,130,204,.28);
+    border-radius: 100px;
+    padding: 4px 10px 4px 9px;
+    font-size: .78rem;
+    color: #2b6ca0;
+    font-weight: 500;
+  }
+
+  .cx {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #2b6ca0;
+    font-size: 1rem;
+    padding: 0;
+    opacity: .55;
+    line-height: 1;
+    transition: opacity .15s;
+  }
+  .cx:hover { opacity: 1; }
+
+  .ci {
+    flex: 1;
+    min-width: 120px;
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .87rem;
+    color: var(--text);
+    outline: none;
+  }
+  .ci::placeholder { color: #99b5cc; }
+
+  .hint { font-size: .7rem; color: var(--hint); margin-top: 7px; }
+
+  .ctrl {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .seg {
+    display: flex;
+    background: rgba(255,255,255,.5);
+    border: 1px solid rgba(255,255,255,.7);
+    border-radius: 100px;
+    padding: 3px;
+    gap: 2px;
+  }
+
+  .sb {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: .78rem;
+    font-weight: 500;
+    color: #7a9ab0;
+    transition: all .18s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .sb.on { background: #fff; color: var(--blue); box-shadow: 0 2px 10px rgba(58,130,204,.2); }
+
+  .fbtn {
+    flex: 1;
+    min-width: 130px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 100px;
+    background: linear-gradient(135deg, var(--blue), var(--blue-light));
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 500;
+    letter-spacing: .04em;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(58,130,204,.34);
+    transition: all .22s;
+  }
+  .fbtn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(58,130,204,.45); }
+  .fbtn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+  .spin {
+    width: 38px; height: 38px;
+    border: 3px solid var(--blue-dim);
+    border-top-color: var(--blue);
+    border-radius: 50%;
+    animation: sp .85s linear infinite;
+    margin: 0 auto 12px;
+  }
+  @keyframes sp { to { transform: rotate(360deg); } }
+
+  .ebox {
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: rgba(200,50,50,.08);
+    border: 1px solid rgba(200,50,50,.2);
+    color: #902020;
+    font-size: .82rem;
+    margin-bottom: 16px;
+    word-break: break-word;
+  }
+
+  .results { display: flex; flex-direction: column; gap: 14px; }
+  .rc { border-radius: 20px; overflow: hidden; }
+
+  .rh {
+    width: 100%;
+    padding: 18px 20px 14px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    background: none;
+    border: none;
+    text-align: left;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+  }
+
+  .rorg { font-size: .63rem; text-transform: uppercase; letter-spacing: .2em; color: var(--blue); font-weight: 500; margin-bottom: 4px; }
+  .rname { font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; font-weight: 300; }
+  .rdesc { margin-top: 4px; font-size: .78rem; color: #6a8aaa; line-height: 1.5; }
+
+  .chev { font-size: .9rem; color: var(--blue); transition: transform .3s; margin-top: 4px; flex-shrink: 0; }
+  .chev.o { transform: rotate(180deg); }
+
+  .rb { max-height: 0; overflow: hidden; transition: max-height .5s cubic-bezier(.4,0,.2,1); }
+  .rb.o { max-height: 3000px; }
+
+  .ri { padding: 0 20px 20px; border-top: 1px solid rgba(255,255,255,.5); }
+  .st { font-size: .66rem; text-transform: uppercase; letter-spacing: .18em; color: var(--hint); font-weight: 500; margin: 16px 0 8px; }
+
+  .il { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; }
+  .il li {
+    background: rgba(58,130,204,.08);
+    border: 1px solid rgba(58,130,204,.2);
+    border-radius: 100px;
+    padding: 3px 11px;
+    font-size: .75rem;
+    color: #2b6ca0;
+  }
+
+  .sl { list-style: none; }
+  .si { display: flex; gap: 11px; padding: 9px 0; font-size: .82rem; line-height: 1.65; color: #2a3a4a; border-bottom: 1px solid rgba(255,255,255,.42); }
+  .sn {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    background: linear-gradient(135deg, var(--blue), var(--blue-light));
+    color: #fff;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .66rem;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+
+  .empty { text-align: center; padding: 36px 20px; color: var(--hint); font-size: .85rem; }
+
+  footer {
+    text-align: center;
+    padding-bottom: 24px;
+    font-size: .64rem;
+    color: var(--hint);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="blob b1"></div>
+<div class="blob b2"></div>
+<div class="blob b3"></div>
+
+<div class="wrap">
+
+  <header class="hdr">
+    <div class="logo">Dish<em>·</em>Craft</div>
+    <div class="tag">Recipes from every corner of the world</div>
+  </header>
+
+  <!-- API Key -->
+  <div class="card glass">
+    <div class="lbl">Gemini API Key</div>
+    <div class="key-row">
+      <input
+        class="key-input"
+        id="keyInput"
+        type="password"
+        placeholder="Paste your key here…"
+        autocomplete="off"
+        autocorrect="off"
+        spellcheck="false"
+      />
+      <span class="key-badge" id="keyBadge">Not set</span>
+    </div>
+    <div class="key-hint">
+      Free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> — no credit card needed
+    </div>
+  </div>
+
+  <!-- Ingredients -->
+  <div class="card glass">
+    <div class="lbl">Your ingredients</div>
+
+    <div class="ca" id="chipArea">
+      <input
+        class="ci"
+        id="ingInput"
+        type="text"
+        placeholder="Type ingredient + press Enter…"
+        autocorrect="off"
+        autocapitalize="none"
+        spellcheck="false"
+      />
+    </div>
+
+    <div class="hint">Tap <strong>Enter</strong> or <strong>,</strong> to add · tap × to remove</div>
+
+    <div class="ctrl">
+      <div class="seg" id="countSeg">
+        <button class="sb on" data-n="1">1 dish</button>
+        <button class="sb" data-n="5">5 dishes</button>
+        <button class="sb" data-n="10">10 dishes</button>
+      </div>
+      <button class="fbtn" id="findBtn" disabled>✦ Find Recipes</button>
+    </div>
+  </div>
+
+  <div id="output"></div>
+
+</div>
+
+<footer>Dish·Craft — Powered by Gemini</footer>
+
+<script>
+  let ingredients = [];
+  let recipeCount = 1;
+  let searching = false;
+
+  const keyInput = document.getElementById('keyInput');
+  const keyBadge = document.getElementById('keyBadge');
+  const chipArea = document.getElementById('chipArea');
+  const ingInput = document.getElementById('ingInput');
+  const countSeg = document.getElementById('countSeg');
+  const findBtn  = document.getElementById('findBtn');
+  const output   = document.getElementById('output');
+
+  // ── API Key ──────────────────────────────────────────
+  keyInput.addEventListener('input', () => {
+    const valid = keyInput.value.trim().length > 10;
+    keyBadge.textContent = valid ? 'Set ✓' : 'Not set';
+    keyBadge.className = 'key-badge' + (valid ? ' set' : '');
+    updateFindBtn();
+  });
+
+  // ── Ingredients ──────────────────────────────────────
+  function addIngredient(raw) {
+    const v = raw.trim().toLowerCase().replace(/,/g, '');
+    if (!v || ingredients.includes(v)) return;
+    ingredients.push(v);
+    renderChips();
+  }
+
+  function removeIngredient(v) {
+    ingredients = ingredients.filter(x => x !== v);
+    renderChips();
+  }
+
+  function renderChips() {
+    chipArea.querySelectorAll('.chip').forEach(el => el.remove());
+    ingredients.forEach(item => {
+      const span = document.createElement('span');
+      span.className = 'chip';
+      span.innerHTML = `${item} <button class="cx" type="button" aria-label="Remove ${item}">×</button>`;
+      span.querySelector('.cx').addEventListener('click', e => {
+        e.stopPropagation();
+        removeIngredient(item);
+      });
+      chipArea.insertBefore(span, ingInput);
+    });
+    ingInput.placeholder = ingredients.length ? 'Add more…' : 'Type ingredient + press Enter…';
+    updateFindBtn();
+  }
+
+  chipArea.addEventListener('click', () => ingInput.focus());
+
+  ingInput.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ',') && ingInput.value.trim()) {
+      e.preventDefault();
+      addIngredient(ingInput.value);
+      ingInput.value = '';
+    } else if (e.key === 'Backspace' && !ingInput.value && ingredients.length) {
+      removeIngredient(ingredients[ingredients.length - 1]);
+    }
+  });
+
+  // ── Count selector ───────────────────────────────────
+  countSeg.addEventListener('click', e => {
+    const btn = e.target.closest('[data-n]');
+    if (!btn) return;
+    recipeCount = parseInt(btn.dataset.n);
+    countSeg.querySelectorAll('.sb').forEach(b => b.classList.toggle('on', b === btn));
+  });
+
+  // ── Button state ─────────────────────────────────────
+  function updateFindBtn() {
+    const hasKey = keyInput.value.trim().length > 10;
+    findBtn.disabled = searching || !ingredients.length || !hasKey;
+  }
+
+  findBtn.addEventListener('click', searchRecipes);
+
+  // ── Search ───────────────────────────────────────────
+  async function searchRecipes() {
+    if (searching) return;
+
+    const apiKey = keyInput.value.trim();
+    if (!apiKey) { keyInput.focus(); return; }
+    if (!ingredients.length) { ingInput.focus(); return; }
+
+    searching = true;
+    updateFindBtn();
+    findBtn.textContent = 'Searching…';
+
+    setOutput(`
+      <div class="card glass" style="text-align:center;padding:40px 20px">
+        <div class="spin"></div>
+        <div>Searching the world's kitchens…</div>
+      </div>
+    `);
+
+    const prompt = `Return exactly ${recipeCount} recipe(s) that can be made using some or all of these ingredients: ${ingredients.join(', ')}.
+
+Respond ONLY with a valid JSON object. No markdown, no code fences, no explanation whatsoever. Use this exact structure:
+{
+  "recipes": [
+    {
+      "name": "Recipe Name",
+      "origin": "Country or Region",
+      "description": "One sentence description.",
+      "ingredients": ["ingredient with quantity", "..."],
+      "steps": ["Step one.", "Step two.", "..."]
+    }
+  ]
+}`;
+
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.7 },
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error?.message || `API error ${res.status}`);
+      }
+
+      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const clean = raw.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(clean);
+      const recipes = Array.isArray(parsed.recipes) ? parsed.recipes : [];
+
+      if (recipes.length === 0) {
+        setOutput(`<div class="card glass empty">No recipes found. Try different ingredients.</div>`);
+      } else {
+        setOutput(`<div class="results">${recipes.map(recipeCard).join('')}</div>`);
+        attachToggleListeners();
+      }
+
+    } catch (err) {
+      let msg = err.message || 'Unknown error.';
+      if (msg.includes('API_KEY_INVALID') || msg.includes('400')) {
+        msg = 'Invalid API key. Get a free one at aistudio.google.com';
+      }
+      setOutput(`<div class="ebox">⚠ ${esc(msg)}</div>`);
+    } finally {
+      searching = false;
+      findBtn.textContent = '✦ Find Recipes';
+      updateFindBtn();
+    }
+  }
+
+  // ── Helpers ──────────────────────────────────────────
+  function esc(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function recipeCard(r) {
+    const origin      = esc(r.origin      || 'Unknown Origin');
+    const name        = esc(r.name        || 'Unnamed Recipe');
+    const description = esc(r.description || '');
+    const ings        = Array.isArray(r.ingredients) ? r.ingredients : [];
+    const steps       = Array.isArray(r.steps)       ? r.steps       : [];
+
+    const ingHTML   = ings.map(i => `<li>${esc(i)}</li>`).join('');
+    const stepsHTML = steps.map((s, idx) => `
+      <li class="si">
+        <div class="sn">${idx + 1}</div>
+        <span>${esc(s)}</span>
+      </li>`).join('');
+
+    return `
+      <div class="rc glass">
+        <button class="rh" type="button" aria-expanded="false">
+          <div>
+            <div class="rorg">${origin}</div>
+            <div class="rname">${name}</div>
+            <div class="rdesc">${description}</div>
+          </div>
+          <div class="chev">▾</div>
+        </button>
+        <div class="rb">
+          <div class="ri">
+            <div class="st">Ingredients</div>
+            <ul class="il">${ingHTML}</ul>
+            <div class="st">How to make it</div>
+            <ol class="sl">${stepsHTML}</ol>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function attachToggleListeners() {
+    output.querySelectorAll('.rh').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const open = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!open));
+        btn.querySelector('.chev').classList.toggle('o', !open);
+        btn.nextElementSibling.classList.toggle('o', !open);
+      });
+    });
+  }
+
+  function setOutput(html) {
+    output.innerHTML = html;
+  }
+</script>
+</body>
+</html>
